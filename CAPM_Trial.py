@@ -47,8 +47,6 @@ def CAPM_Data(Ticker, Sdate, Edate):
 SDate = Date_Period[0].strftime('%Y-%m-%d')
 EDate = Date_Period[1].strftime('%Y-%m-%d')
 
-#market = 'S&P 500'
-#stock = 'MSFT'
 
 if stock == ' ' or market == ' ':
     st.write('Please select required fields *')
@@ -73,6 +71,8 @@ else:
     CAPM = pd.concat([Stock_Data, Market, TBills], axis = 1)
     CAPM['Rm-Rf'] = CAPM[market_tick + '_Returns'] - CAPM['Rate']
     CAPM['R_' + stock + '-Rf'] = CAPM[stock + '_Returns'] - CAPM['Rate']
+    
+    
     
     #CAPM Regression
     
@@ -128,28 +128,33 @@ else:
         elif sig_level == '1%': 
             sig = 0.01
     
+        Y = CAPM['R_' + stock + '-Rf']
+        X = CAPM['Rm-Rf']    
+        X = sm.add_constant(X)
         mod = RollingOLS(Y, X, window = int(window_size)) 
         rolling_reg = mod.fit()
         params  = rolling_reg.params.copy() #Copies parameters to DataFrame
         conf_int = rolling_reg.conf_int(alpha = sig)
     
+    
+    
     #Concat: This is possible as all three dataframes (params, conf_int, CAPM) have the same date on the same index.
-        Parameters = pd.concat([params, conf_int], axis = 1)
-        Parameters.columns #Check Column names
-        Parameters.rename(columns = {'Rm_Rf':'Beta', ('const', 'lower'):'const_lower',('const', 'upper'): 'const_upper',('Rm_Rf', 'lower'):'Beta_Lower', ('Rm_Rf', 'upper'):'Beta_Upper'}, inplace = True)
-        Parameters['Date'] = CAPM['Date']
+        Parameters_Rolling = pd.concat([params, conf_int], axis = 1)
+        Parameters_Rolling.columns #Check Column names
+        Parameters_Rolling.rename(columns = {'const':'Alpha', 'Rm-Rf':'Beta', ('const', 'lower'):'Alpha_lower',('const', 'upper'): 'Alpha_upper',('Rm-Rf', 'lower'):'Beta_Lower', ('Rm-Rf', 'upper'):'Beta_Upper'}, inplace = True)
+        Parameters_Rolling['Date'] = CAPM['Date']
         
         fig, ax = plt.subplots(2, figsize = (15, 6)) #indicate that there are two subplots
-        ax[0].plot(Parameters['Date'], Parameters['Beta_Lower'], label  = 'L_CI', color = 'violet', linestyle = '--')
-        ax[0].plot(Parameters['Date'], Parameters['Beta'], label  = 'Beta', color = 'indigo')
-        ax[0].plot(Parameters['Date'], Parameters['Beta_Upper'], label  = 'U_CI', color = 'violet', linestyle = '--')
+        ax[0].plot(Parameters_Rolling['Date'], Parameters_Rolling['Beta_Lower'], label  = 'L_CI', color = 'violet', linestyle = '--')
+        ax[0].plot(Parameters_Rolling['Date'], Parameters_Rolling['Beta'], label  = 'Beta', color = 'indigo')
+        ax[0].plot(Parameters_Rolling['Date'], Parameters_Rolling['Beta_Upper'], label  = 'U_CI', color = 'violet', linestyle = '--')
         ax[0].legend(loc = 1)
         
         ax[1].set_xlabel('Date', fontsize  = 10)
-        ax[0].set_title(stock + ': Rolling Beta and Alpha (' + window_size + ')')
-        ax[1].plot(Parameters['Date'], Parameters['Alpha_lower'], label  = 'L_CI', color = 'skyblue', linestyle = '--')
-        ax[1].plot(Parameters['Date'], Parameters['Alpha'], label  = 'const', color = 'navy')
-        ax[1].plot(Parameters['Date'], Parameters['Alpha_upper'], label  = 'U_CI', color = 'skyblue', linestyle = '--')
+        ax[0].set_title(stock + ': Rolling Beta and Alpha (' + window_size + ' days)')
+        ax[1].plot(Parameters_Rolling['Date'], Parameters_Rolling['Alpha_lower'], label  = 'L_CI', color = 'skyblue', linestyle = '--')
+        ax[1].plot(Parameters_Rolling['Date'], Parameters_Rolling['Alpha'], label  = 'Alpha', color = 'navy')
+        ax[1].plot(Parameters_Rolling['Date'], Parameters_Rolling['Alpha_upper'], label  = 'U_CI', color = 'skyblue', linestyle = '--')
         ax[1].legend(loc = 1)
         
         st.pyplot(fig)
