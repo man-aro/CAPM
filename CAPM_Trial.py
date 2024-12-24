@@ -15,17 +15,13 @@ from datetime import datetime
 st.title('Capital Asset Pricing Model')
 
 st.write('DataSource: Yahoo Finance')
+st.write('Default Risk-Free Rate: 3-month Treasury Bills.')
 
 stock = st.selectbox("Select a Stock*: ", (' ', 'MSFT', 'AMZN', 'NVDA', 'AMD', 'META'))
 
-
+market = st.selectbox("Select a Market*: ", (' ', 'S&P 500', 'NASDAQ 100'))
 
 Date_Period = st.slider("Select Period:", value=(datetime(2014, 1, 1), datetime(2024, 12, 23)))
-
-
-
-
-
 
 
 def CAPM_Data(Ticker, Sdate, Edate):
