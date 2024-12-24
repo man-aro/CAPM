@@ -27,40 +27,42 @@ Date_Period = st.slider("Select Period:", value=(datetime(2018, 1, 1), datetime(
 def CAPM_Data(Ticker, Sdate, Edate):
     tick = yf.Ticker(Ticker)
     hist_data =  tick.history(start = Sdate, end = Edate)
-    hist_data['Volume'] = hist_data['Volume']/1e5
     hist_data['Returns'] = hist_data['Close'].pct_change()
     hist_data = hist_data[hist_data['Returns'].notna()]
     hist_data.reset_index(inplace = True)
     hist_data.rename(columns = {'index':'Date'}, inplace = True)
-    #hist_data['Date'] = hist_data['Date'].dt.strftime('%Y/%m/%d')
-    #hist_data['Date'] = pd.to_datetime(hist_data['Date']) 
+    hist_data['Date'] = hist_data['Date'].dt.strftime('%Y/%m/%d')
+    hist_data['Date'] = pd.to_datetime(hist_data['Date']) 
+    hist_data = hist_data[['Date', 'Close', 'Returns']]
+    hist_data.rename(columns = {'Close': Ticker + '_Close', 'Returns': Ticker + '_Returns'}, inplace = True)
     return hist_data
+
 
 
 SDate = Date_Period[0].strftime('%Y-%m-%d')
 EDate = Date_Period[1].strftime('%Y-%m-%d')
 
 
+Stock_Data = CAPM_Data(stock, SDate, EDate)
+Stock_Data.drop('Date', inplace = True, axis = 1)
+
 if market == 'S&P 500':
     market_tick = '^GSPC'
     Market = CAPM_Data(market_tick, SDate, EDate)   #S&P 500 
     Market.drop('Date', inplace = True, axis = 1)
-    Market.rename(columns = {'Returns':market_tick + '_Returns'}, inplace = True)
 elif market == 'NASDAQ 100':
     market_tick = '^NDX'
     Market = CAPM_Data(market_tick, SDate, EDate)   #NASDAQ 100
     Market.drop('Date', inplace = True, axis = 1)
-    Market.rename(columns = {'Returns':market_tick + '_Returns'}, inplace = True)
+
     
 TBills = CAPM_Data('^IRX', SDate, EDate)   #3-month t-bills
-TBills['Rate'] = TBills['Close']/100
+TBills['Rate'] = TBills['^IRX_Close']/100
 TBills = TBills[['Date', 'Rate']]
-
-Stock_Data = CAPM_Data(stock, SDate, EDate)
-Stock_Data.drop('Date', inplace = True, axis = 1)
+CAPM = pd.concat([Stock_Data, Market, TBills], axis = 1)
 
 CAPM = pd.concat([Stock_Data, Market, TBills], axis = 1)
 CAPM['Rm-Rf'] = CAPM[market_tick + '_Returns'] - CAPM['Rate']
-
+CAPM['R_' + stock + '-Rf'] = CAPM[stock + '_Returns'] - CAPM['Rate']
 
 st.dataframe(CAPM.head())
