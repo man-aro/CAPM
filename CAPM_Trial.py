@@ -84,26 +84,26 @@ Parameters = results.params
 P_values = results.pvalues
 
 if P_values[0] < 0.01:
-    sig_alpha = '*'
+    sig_alpha = '(*)'
 elif (P_values[0] < 0.05) & (P_values[0] > 0.01):
-    sig_alpha = '**'
+    sig_alpha = '(**)'
 elif (P_values[0] < 0.10) & (P_values[0] > 0.05):
-    sig_alpha = '***'
+    sig_alpha = '(***)'
 else:
-    sig_alpha = ' '
+    sig_alpha = '( )'
 
 
 if P_values[1] < 0.01:
-    sig_beta = '*'
+    sig_beta = '(*)'
 elif (P_values[1] < 0.05) & (P_values[1] > 0.01):
-    sig_beta = '**'
+    sig_beta = '(**)'
 elif (P_values[1] < 0.10) & (P_values[1] > 0.05):
-    sig_beta = '***'
+    sig_beta = '(***)'
 else:
-    sig_beta = ' '
+    sig_beta = '( )'
 
 
 
 st.write('CAPM Results over Sample Period')
-st.write('Alpha = ' + str(round(Parameters[0],5)) + sig_alpha + '\nBeta = '+ str(round(Parameters[1],5)) + sig_beta)
-st.write("* - 1% significance, ** - 5% significance, *** - 10% significance, ' ' - insignificant")
+st.write('Alpha =  ' + str(round(Parameters[0],3)) + sig_alpha + '\nBeta =  '+ str(round(Parameters[1],3)) + sig_beta)
+st.write(" (*) - 1% significance, (**) - 5% significance, (***) - 10% significance, ( ) - insignificant")
