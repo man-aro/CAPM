@@ -36,3 +36,18 @@ def CAPM_Data(Ticker, Sdate, Edate):
     hist_data = hist_data[['Date', 'Close', 'Returns']]
     hist_data.rename(columns = {'Close': Ticker + '_Close', 'Returns': Ticker + '_Returns'}, inplace = True)
     return hist_data
+
+
+SDate = Date_Period[0].strftime('%Y-%m-%d')
+EDate = Date_Period[1].strftime('%Y-%m-%d')
+
+
+if market == 'S&P 500':
+    Market = CAPM_Data('^GSPC', SDate, EDate)   #S&P 500 
+    Market.drop('Date', inplace = True, axis = 1)
+elif market == 'NASDAQ 100':
+    Market = CAPM_Data('^NDX', SDate, EDate)   #NASDAQ 100
+    Market.drop('Date', inplace = True, axis = 1)
+    
+    
+st.write(Market.head())
