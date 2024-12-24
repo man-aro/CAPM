@@ -45,17 +45,18 @@ if market == 'S&P 500':
     market_tick = '^GSPC'
     Market = CAPM_Data(market_tick, SDate, EDate)   #S&P 500 
     Market.drop('Date', inplace = True, axis = 1)
+    Market.rename(columns = {'Returns':market_tick + '_Returns'}, inplace = True)
 elif market == 'NASDAQ 100':
     market_tick = '^NDX'
     Market = CAPM_Data(market_tick, SDate, EDate)   #NASDAQ 100
     Market.drop('Date', inplace = True, axis = 1)
-    
+    Market.rename(columns = {'Returns':market_tick + '_Returns'}, inplace = True)
     
 TBills = CAPM_Data('^IRX', SDate, EDate)   #3-month t-bills
 TBills['Rate'] = TBills['Close']/100
 TBills = TBills[['Date', 'Rate']]
 
-Stock_Data = CAPM_Data('MSFT', SDate, EDate)
+Stock_Data = CAPM_Data(stock, SDate, EDate)
 Stock_Data.drop('Date', inplace = True, axis = 1)
 
 CAPM = pd.concat([Stock_Data, Market, TBills], axis = 1)
