@@ -11,6 +11,8 @@ import yfinance as yf
 import pandas as pd 
 import matplotlib.pyplot as plt 
 from datetime import datetime
+import statsmodels.api as sm 
+from statsmodels.regression.rolling import RollingOLS
 
 st.title('Capital Asset Pricing Model')
 
@@ -42,6 +44,8 @@ def CAPM_Data(Ticker, Sdate, Edate):
 SDate = Date_Period[0].strftime('%Y-%m-%d')
 EDate = Date_Period[1].strftime('%Y-%m-%d')
 
+#market = 'S&P 500'
+#stock = 'MSFT'
 
 Stock_Data = CAPM_Data(stock, SDate, EDate)
 Stock_Data.drop('Date', inplace = True, axis = 1)
@@ -65,4 +69,41 @@ CAPM = pd.concat([Stock_Data, Market, TBills], axis = 1)
 CAPM['Rm-Rf'] = CAPM[market_tick + '_Returns'] - CAPM['Rate']
 CAPM['R_' + stock + '-Rf'] = CAPM[stock + '_Returns'] - CAPM['Rate']
 
-st.dataframe(CAPM.head())
+
+#CAPM Regression
+
+Y = CAPM['R_' + stock + '-Rf']
+X = CAPM['Rm-Rf']
+
+X = sm.add_constant(X)
+
+regression_model = sm.OLS(Y, X)
+results = regression_model.fit()
+
+Parameters = results.params
+P_values = results.pvalues
+
+if P_values[0] < 0.01:
+    sig_alpha = '*'
+elif (P_values[0] < 0.05) & (P_values[0] > 0.01):
+    sig_alpha = '**'
+elif (P_values[0] < 0.10) & (P_values[0] > 0.05):
+    sig_alpha = '***'
+else:
+    sig_alpha = ' '
+
+
+if P_values[1] < 0.01:
+    sig_beta = '*'
+elif (P_values[1] < 0.05) & (P_values[1] > 0.01):
+    sig_beta = '**'
+elif (P_values[1] < 0.10) & (P_values[1] > 0.05):
+    sig_beta = '***'
+else:
+    sig_beta = ' '
+
+
+
+st.write('CAPM Results over Sample Period')
+st.write('Alpha = ' + str(round(Parameters[0],5)) + sig_alpha + '\nBeta = '+ str(round(Parameters[1],5)) + sig_beta)
+st.write("* - 1% significance, ** - 5% significance, *** - 10% significance, ' ' - insignificant")
