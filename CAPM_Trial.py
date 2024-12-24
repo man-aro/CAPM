@@ -63,4 +63,4 @@ CAPM = pd.concat([Stock_Data, Market, TBills], axis = 1)
 CAPM['Rm-Rf'] = CAPM[market_tick + '_Returns'] - CAPM['Rate']
 
 
-st.DataFrame(CAPM.head())
+st.dataframe(CAPM.head())
