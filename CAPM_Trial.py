@@ -135,12 +135,11 @@ else:
         rolling_reg = mod.fit()
         params  = rolling_reg.params.copy() #Copies parameters to DataFrame
         conf_int = rolling_reg.conf_int(alpha = sig)
-    
+        p_values = rolling_reg.p_values(alpha = sig)
     
     
     #Concat: This is possible as all three dataframes (params, conf_int, CAPM) have the same date on the same index.
         Parameters_Rolling = pd.concat([params, conf_int], axis = 1)
-        Parameters_Rolling.columns #Check Column names
         Parameters_Rolling.rename(columns = {'const':'Alpha', 'Rm-Rf':'Beta', ('const', 'lower'):'Alpha_lower',('const', 'upper'): 'Alpha_upper',('Rm-Rf', 'lower'):'Beta_Lower', ('Rm-Rf', 'upper'):'Beta_Upper'}, inplace = True)
         Parameters_Rolling['Date'] = CAPM['Date']
         
