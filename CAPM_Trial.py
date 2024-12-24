@@ -21,7 +21,7 @@ stock = st.selectbox("Select a Stock*: ", (' ', 'MSFT', 'AMZN', 'NVDA', 'AMD', '
 
 market = st.selectbox("Select a Market*: ", (' ', 'S&P 500', 'NASDAQ 100'))
 
-Date_Period = st.slider("Select Period:", value=(datetime(2014, 1, 1), datetime(2024, 12, 23)))
+Date_Period = st.slider("Select Period:", value=(datetime(2018, 1, 1), datetime(2024, 11, 30)))
 
 
 def CAPM_Data(Ticker, Sdate, Edate):
@@ -32,8 +32,8 @@ def CAPM_Data(Ticker, Sdate, Edate):
     hist_data = hist_data[hist_data['Returns'].notna()]
     hist_data.reset_index(inplace = True)
     hist_data.rename(columns = {'index':'Date'}, inplace = True)
-    hist_data['Date'] = hist_data['Date'].dt.strftime('%Y/%m/%d')
-    hist_data['Date'] = pd.to_datetime(hist_data['Date']) 
+    #hist_data['Date'] = hist_data['Date'].dt.strftime('%Y/%m/%d')
+    #hist_data['Date'] = pd.to_datetime(hist_data['Date']) 
     return hist_data
 
 
@@ -52,10 +52,10 @@ elif market == 'NASDAQ 100':
     
     
 TBills = CAPM_Data('^IRX', SDate, EDate)   #3-month t-bills
-TBills['Rate'] = TBills['^IRX_Close']/100
+TBills['Rate'] = TBills['Close']/100
 TBills = TBills[['Date', 'Rate']]
 
-Stock_Data = CAPM_Data(stock, SDate, EDate)
+Stock_Data = CAPM_Data('MSFT', SDate, EDate)
 Stock_Data.drop('Date', inplace = True, axis = 1)
 
 CAPM = pd.concat([Stock_Data, Market, TBills], axis = 1)
