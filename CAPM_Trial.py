@@ -50,4 +50,4 @@ elif market == 'NASDAQ 100':
     Market.drop('Date', inplace = True, axis = 1)
     
     
-st.write(Market.head())
+st.dataframe(Market.head())
