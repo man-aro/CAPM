@@ -23,6 +23,9 @@ stock = st.selectbox("Select a Stock*: ", (' ', 'MSFT', 'AMZN', 'NVDA', 'AMD', '
 
 market = st.selectbox("Select a Market*: ", (' ', 'S&P 500', 'NASDAQ 100'))
 
+
+
+
 Date_Period = st.slider("Select Period:", value=(datetime(2018, 1, 1), datetime(2024, 11, 30)))
 
 
@@ -50,7 +53,6 @@ EDate = Date_Period[1].strftime('%Y-%m-%d')
 if stock == ' ' or market == ' ':
     st.write('Please select required fields *')
 else: 
-
     Stock_Data = CAPM_Data(stock, SDate, EDate)
     Stock_Data.drop('Date', inplace = True, axis = 1)
     
@@ -109,3 +111,45 @@ else:
     st.write('1% significance: *\n5% significance: **\n10% significance: ***\n' + 'Statistical Insignificance: -')
     
     
+    
+    #Rolling Regression
+    window_size = st.selectbox("Select a Window Size (days)*: ",(' ', '30', '60'))
+    st.write("Window size determines the number of historical observations (days) from which information is considered.")
+    
+    sig_level = st.selectbox("Select a Level of Significance (%)*: ", (' ', '10%', '5%', '1%'))
+
+    if window_size == ' ' or sig_level == ' ':
+        st.write('Please select required fields *')
+    else: 
+        if sig_level == '10%':
+            sig= 0.1
+        elif sig_level == '5%':
+            sig = 0.05
+        elif sig_level == '1%': 
+            sig = 0.01
+    
+        mod = RollingOLS(Y, X, window = int(window_size)) 
+        rolling_reg = mod.fit()
+        params  = rolling_reg.params.copy() #Copies parameters to DataFrame
+        conf_int = rolling_reg.conf_int(alpha = sig)
+    
+    #Concat: This is possible as all three dataframes (params, conf_int, CAPM) have the same date on the same index.
+        Parameters = pd.concat([params, conf_int], axis = 1)
+        Parameters.columns #Check Column names
+        Parameters.rename(columns = {'Rm_Rf':'Beta', ('const', 'lower'):'const_lower',('const', 'upper'): 'const_upper',('Rm_Rf', 'lower'):'Beta_Lower', ('Rm_Rf', 'upper'):'Beta_Upper'}, inplace = True)
+        Parameters['Date'] = CAPM['Date']
+        
+        fig, ax = plt.subplots(2, figsize = (15, 6)) #indicate that there are two subplots
+        ax[0].plot(Parameters['Date'], Parameters['Beta_Lower'], label  = 'L_CI', color = 'violet', linestyle = '--')
+        ax[0].plot(Parameters['Date'], Parameters['Beta'], label  = 'Beta', color = 'indigo')
+        ax[0].plot(Parameters['Date'], Parameters['Beta_Upper'], label  = 'U_CI', color = 'violet', linestyle = '--')
+        ax[0].legend(loc = 1)
+        
+        ax[1].set_xlabel('Date', fontsize  = 10)
+        ax[0].set_title(stock + ': Rolling Beta and Alpha (' + window_size + ')')
+        ax[1].plot(Parameters['Date'], Parameters['Alpha_lower'], label  = 'L_CI', color = 'skyblue', linestyle = '--')
+        ax[1].plot(Parameters['Date'], Parameters['Alpha'], label  = 'const', color = 'navy')
+        ax[1].plot(Parameters['Date'], Parameters['Alpha_upper'], label  = 'U_CI', color = 'skyblue', linestyle = '--')
+        ax[1].legend(loc = 1)
+        
+        st.pyplot(fig)
