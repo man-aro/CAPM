@@ -106,4 +106,4 @@ else:
 
 st.write('CAPM Results over Sample Period')
 st.write('Alpha =  ' + str(round(Parameters[0],3)) + sig_alpha + '\nBeta =  '+ str(round(Parameters[1],3)) + sig_beta)
-st.write(" (*) - 1% significance, (**) - 5% significance, (***) - 10% significance, ( ) - insignificant")
+st.write(' (*) - 1% significance, (**) - 5% significance, (***) - 10% significance, ( ) - insignificant')
