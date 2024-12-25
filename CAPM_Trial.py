@@ -134,7 +134,6 @@ else:
         rolling_reg = mod.fit()
         params  = rolling_reg.params.copy() #Copies parameters to DataFrame
         conf_int = rolling_reg.conf_int(alpha = sig)
-        p_values = rolling_reg.p_values(alpha = sig)
     
     
     #Concat: This is possible as all three dataframes (params, conf_int, CAPM) have the same date on the same index.
