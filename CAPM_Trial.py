@@ -107,9 +107,8 @@ else:
         sig_beta = '(-)'
     
     st.write('CAPM Results over Sample Period')
-    st.write('Alpha =  ' + str(round(Parameters[0],3)) + sig_alpha + '\nBeta =  '+ str(round(Parameters[1],3)) + sig_beta)
-    st.write('1% significance: *\n5% significance: **\n10% significance: ***\n' + 'Statistical Insignificance: -')
-    
+    st.write('Alpha =  ' + str(round(Parameters[0],3)) + sig_alpha)
+    st.write('Beta =  '+ str(round(Parameters[1],3)) + sig_beta)
     
     
     #Rolling Regression
